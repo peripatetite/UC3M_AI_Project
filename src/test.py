@@ -39,8 +39,6 @@ with open('../resources/TrafficData.txt') as csvfile:
 
     n_totals = np.delete(n_totals, 0, 0)
     n_counts = np.delete(n_counts, 0, 0)
-    print(n_totals)
-    print(n_counts)
 
     e_totals = np.delete(e_totals, 0, 0)
     e_counts = np.delete(e_counts, 0, 0)
@@ -51,14 +49,17 @@ with open('../resources/TrafficData.txt') as csvfile:
     n_prob = np.zeros((7, 8))
     e_prob = np.zeros((7, 8))
     w_prob = np.zeros((7, 8))
+
+
     for i in range(7):
         n_prob[i] = n_counts[i] / n_totals[i]
         e_prob[i] = e_counts[i] / e_totals[i]
         w_prob[i] = w_counts[i] / w_totals[i]
 
-    print(n_prob)
     values = np.zeros(8)
+    temp_vals = values.copy()
 
+    # Calculate the Bellman Equations
     for iterations in range(500):
         for v in range(len(values) - 1):
             v_n = 1 + sum(n_prob[v] * values)
@@ -66,9 +67,27 @@ with open('../resources/TrafficData.txt') as csvfile:
             v_w = 1 + sum(w_prob[v] * values)
 
             e = (min(v_n, v_e, v_w))
-            values[v] = e
+            temp_vals[v + 1] = e
+        values = temp_vals.copy()
+    print(values)
 
+    # values now holds accurate values for each V(s)
+    # Now we can calculate the optimal policy for each state
+    optimals = []
+    for v in range(len(values) - 1):
+        v_n = 1 + sum(n_prob[v] * values)
+        v_e = 1 + sum(e_prob[v] * values)
+        v_w = 1 + sum(w_prob[v] * values)
 
+        e = (min(v_n, v_e, v_w))
+        if e == v_n:
+            optimals.append('n')
+        elif e == v_e:
+            optimals.append('e')
+        else:
+            optimals.append('w')
+    print(optimals)
 
+    print(e_prob)
 
 
